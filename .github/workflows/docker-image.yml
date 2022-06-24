@@ -14,6 +14,15 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        # Container registry username
+        username: humaniaregistry 
+        # Container registry password
+        password: 9qDq6QX3OPdlE1zpGJh8o1JcmPi=0KeO
+        # Container registry server url
+        login-server: humaniaregistry.azurecr.io
     - name: Azure Container Registry Build
       uses: Azure/acr-build@v1
       with:
@@ -27,7 +36,6 @@ jobs:
         registry: humaniaregistry
         # Repository to use
         repository: fastapi
-        # Github access token for private repositories
-        git_access_token: 
+
 
 
