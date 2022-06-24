@@ -25,5 +25,5 @@ jobs:
           push: true
           build-args: |
             version=1
-          tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}
+          tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}:latest
 
