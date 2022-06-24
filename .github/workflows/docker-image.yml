@@ -9,10 +9,25 @@ on:
 jobs:
 
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Azure Container Registry Build
+      uses: Azure/acr-build@v1
+      with:
+        # Service Principal with Contributor role on the ACR
+        service_principal: 3a1e270a-deb9-4a2b-96b9-4c34632f7fd0
+        # Service Principal password
+        service_principal_password: 2u28Q~470cFnx_B2zNGDWjmR-1KxO0gZ3Z2aab2_
+        # Azure Container Registry tenant
+        tenant: 63cfcc19-bb46-43a7-bc31-22e32740eaba
+        # The name of the ACR, minus the .azurecr.io
+        registry: humaniaregistry
+        # Repository to use
+        repository: fastapi
+        # Github access token for private repositories
+        git_access_token: 
+
+
