@@ -29,6 +29,27 @@ jobs:
             docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/fastapi:${{ github.sha }}
             docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/fastapi:${{ github.sha }}
 
+        - name: HashiCorp - Setup Terraform
+          # You may pin to the exact commit or the version.
+          # uses: hashicorp/setup-terraform@17d4c9b8043b238f6f35641cdd8433da1e6f3867
+          uses: hashicorp/setup-terraform@v2.0.0
+
+        - name: Terraform init azurerm backend
+          # You may pin to the exact commit or the version.
+          # uses: ahmedig/terraform-azurerm-backend@9ef835db31c52a0049bc60f295b869213e0fa580
+          uses: ahmedig/terraform-azurerm-backend@v1
+          with:
+            # Azure Credentials in JSON format
+            azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+            # State file location - resource group name
+            resource_group_name: rg-humania-tfstates
+            # State file location - container name
+            container_name: tfstates
+            # State file location - storage account name
+            storage_account_name: humaniadevtfstates
+            # State file location - file name
+            file_name: test-github.tfstate
+
         - name: 'Deploy to Azure Container Instances'
           uses: 'azure/aci-deploy@v1'
           with:
