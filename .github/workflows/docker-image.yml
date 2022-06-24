@@ -5,25 +5,39 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+          
 jobs:
-  build:
-    name: Build container image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Log into registry
-        uses: docker/login-action@v1
-        with:
-          registry: humaniaregistry.azurecr.io
-          username: humaniaregistry
-          password: 9qDq6QX3OPdlE1zpGJh8o1JcmPi=0KeO
-      - name: Build & Push
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          build-args: |
-            version=1
-          tags: humaniaregistry.azurecr.io/fastapi:1
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+          
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+        - name: 'Build and push image'
+          uses: azure/docker-login@v1
+          with:
+            login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.REGISTRY_USERNAME }}
+            password: ${{ secrets.REGISTRY_PASSWORD }}
+        - run: |
+            docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
+            docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/sampleapp:${{ github.sha }}
+
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: test-github
+            dns-name-label: test-github
+            image: ${{ secrets.REGISTRY_LOGIN_SERVER }}/fastapi:${{ github.sha }}
+            registry-login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.REGISTRY_PASSWORD }}
+            name: aci-sampleapp
+            location: 'west us'
 
